@@ -1,0 +1,78 @@
+/* Estilo do body para centralizar a página */
+body {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  
+  /* Container principal da lista de tarefas */
+  .todo-container {
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+    background-color: #282c34;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  
+  /* Estilo do título */
+  .title {
+    position: absolute;
+    top: -40px; /* Ajusta a posição para o canto superior esquerdo */
+    left: 0;
+    font-size: 24px;
+    font-weight: bold;
+    padding-left: 20px;
+  }
+  
+  /* Container dos inputs */
+  .input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+  
+  /* Estilo dos elementos de input, select e botão */
+  input, select, button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #3b3b3b;
+    color: #e0e0e0;
+  }
+  
+  button {
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Estilo da tabela */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #444;
+    color: #e0e0e0;
+  }
+  
