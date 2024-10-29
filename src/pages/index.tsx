@@ -1,89 +1,66 @@
-import React, { useState, useEffect } from 'react';
-
-interface Todo {
-  id: number;
-  Name: string;         
-  Description: string;  
-  DateStart: string;    
-  DateEnd: string;      
-  Priority: string;     
-}
+import { useState } from "react";
+import { useToDos } from "@/hooks";
 
 const App: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [Name, setName] = useState<string>('');  // Campo de nome
-  const [Description, setDescription] = useState<string>('');  // Campo de descrição
-  const [DateStart, setDateStart] = useState<string>('');  // Campo de data de início
-  const [DateEnd, setDateEnd] = useState<string>('');  // Campo de data final
-  const [Priority, setPriority] = useState<string>('Low');  // Campo de prioridade
+  const {
+    todos,
+    addTodo,
+    deleteTodo,
+    updateTodoById, // Função para atualizar a ToDo
+  } = useToDos();
 
-  // Função para buscar todos os ToDos
-  const fetchTodos = async () => {
-    try {
-      const response = await fetch('/api/todo');
-      const data = await response.json();
-      setTodos(data);
-    } catch (error) {
-      console.error('Error fetching ToDos:', error);
-    }
-  };
+  // Estados locais para manter os valores do formulário
+  const [Name, setName] = useState<string>("");
+  const [Description, setDescription] = useState<string>("");
+  const [DateStart, setDateStart] = useState<string>("");
+  const [DateEnd, setDateEnd] = useState<string>("");
+  const [Priority, setPriority] = useState<string>("Low");
+  const [isEditing, setIsEditing] = useState<boolean>(false); // Define se está editando
+  const [editId, setEditId] = useState<number | null>(null); // ID da tarefa que está sendo editada
 
-  // Função para adicionar um novo ToDo
-  const addTodo = async () => {
-    if (Name.trim() && Description.trim() && DateStart && DateEnd && Priority) {
-      try {
-        const response = await fetch('/api/todo', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            Name,         
-            Description,  
-            DateStart,    
-            DateEnd,      
-            Priority,     
-          }),
-        });
-
-        if (response.ok) {
-          const newTodo = await response.json();
-          setTodos((prev) => [...prev, newTodo]);
-          setName('');
-          setDescription('');
-          setDateStart('');
-          setDateEnd('');
-          setPriority('Low');
-        } else {
-          console.error('Error adding ToDo');
-        }
-      } catch (error) {
-        console.error('Error adding ToDo:', error);
-      }
-    }
-  };
-
-  // Função para deletar um ToDo
-  const deleteTodo = async (id: number) => {
-    try {
-      const response = await fetch(`/api/todo?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setTodos(todos.filter((todo) => todo.id !== id));
+  // Função para lidar com a adição ou atualização de um ToDo
+  const handleAddOrUpdateTodo = () => {
+    if (isEditing && editId !== null) {
+      // Se estiver no modo de edição, atualiza a tarefa
+      updateTodoById(editId, Name, Description, DateStart, DateEnd, Priority);
+      setIsEditing(false);
+      setEditId(null);
+    } else {
+      // Caso contrário, adiciona um novo ToDo
+      if (Name && Description && DateStart && DateEnd && Priority) {
+        addTodo(Name, Description, DateStart, DateEnd, Priority);
       } else {
-        console.error('Error deleting ToDo');
+        alert("Please fill in all fields.");
+        return;
       }
-    } catch (error) {
-      console.error('Error deleting ToDo:', error);
     }
+
+    setName("");
+    setDescription("");
+    setDateStart("");
+    setDateEnd("");
+    setPriority("Low");
   };
 
-  // Fetch ToDos quando o componente monta
-  useEffect(() => {
-    fetchTodos();
-  }, []);
+  const handleEditTodo = (todo: any) => {
+    if (isEditing && editId === todo.id) {
+      setIsEditing(false);
+      setEditId(null);
+      setName("");
+      setDescription("");
+      setDateStart("");
+      setDateEnd("");
+      setPriority("Low");
+    } else {
+      setName(todo.Name);
+      setDescription(todo.Description);
+      setDateStart(todo.DateStart);
+      setDateEnd(todo.DateEnd);
+      setPriority(todo.Priority);
+      setIsEditing(true);
+      setEditId(todo.id);
+    }
+  };
 
   return (
     <div className="todo-container">
@@ -116,7 +93,9 @@ const App: React.FC = () => {
           <option value="Medium">Medium</option>
           <option value="High">High</option>
         </select>
-        <button onClick={addTodo}>Add To Do</button>
+        <button onClick={handleAddOrUpdateTodo}>
+          {isEditing ? "Update To Do" : "Add To Do"}
+        </button>
       </div>
 
       <table>
@@ -133,13 +112,17 @@ const App: React.FC = () => {
         <tbody>
           {todos.map((todo) => (
             <tr key={todo.id}>
-              <td>{todo.Name}</td>  {/* Exibindo o campo "Name" */}
-              <td>{todo.Description}</td>  {/* Exibindo o campo "Description" */}
-              <td>{todo.DateStart}</td>  {/* Exibindo o campo "DateStart" */}
-              <td>{todo.DateEnd}</td>  {/* Exibindo o campo "DateEnd" */}
-              <td>{todo.Priority}</td>  {/* Exibindo o campo "Priority" */}
+              <td>{todo.Name}</td> {/* Exibindo o campo "Name" */}
+              <td>{todo.Description}</td> {/* Exibindo o campo "Description" */}
+              <td>{todo.DateStart}</td> {/* Exibindo o campo "DateStart" */}
+              <td>{todo.DateEnd}</td> {/* Exibindo o campo "DateEnd" */}
+              <td>{todo.Priority}</td> {/* Exibindo o campo "Priority" */}
               <td>
                 <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+                <button onClick={() => handleEditTodo(todo)}>
+                  {isEditing && editId === todo.id ? "Cancel" : "Edit"}
+                </button>
+                {/* O botão alterna entre "Cancel" e "Edit" */}
               </td>
             </tr>
           ))}
